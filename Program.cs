@@ -1,10 +1,38 @@
+using OrderGenerator.API;
+using OrderGenerator.API.DTO;
+using QuickFix.Transport;
+using QuickFix;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+try
+{
+	var file = new StreamReader("./client.cfg");
+
+	SessionSettings settings = new SessionSettings(file);
+	FIXCommunicator application = new FIXCommunicator();
+	IMessageStoreFactory storeFactory = new FileStoreFactory(settings);
+	ILogFactory logFactory = new FileLogFactory(settings);
+
+	builder.Services.AddSingleton(application);
+
+	var initiator = new SocketInitiator(application, storeFactory, settings, logFactory);
+	//var initiator = new ThreadedSocketAcceptor(application, storeFactory, settings, logFactory);
+
+	initiator.Start();
+}
+catch (Exception ex)
+{
+	Console.WriteLine(ex.Message);
+}
+
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -13,30 +41,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//{ 
-//    var summaries = new[]
-//    {
-//        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-//    };
-//    app.MapGet("/weatherforecast", () =>
-//    {
-//        var forecast = Enumerable.Range(1, 5).Select(index =>
-//            new WeatherForecast
-//            (
-//                DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//                Random.Shared.Next(-20, 55),
-//                summaries[Random.Shared.Next(summaries.Length)]
-//            ))
-//            .ToArray();
-//        return forecast;
-//    })
-//    .WithName("GetWeatherForecast")
-//    .WithOpenApi();
-//}
+app.MapPost("/ordergenerator", async (OrderGeneratorRequestDTO request, FIXCommunicator fixApp) =>
+{
+	try
+	{
+		await fixApp.Run(request);
+	}
+	catch (Exception ex)
+	{
+		return Results.BadRequest(ex.Message);
+	}
+
+	return Results.Ok();
+})
+.WithName("ordergenerator")
+.WithOpenApi();
+
+
 
 app.Run();
 
-//internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-//{
-//    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-//}
