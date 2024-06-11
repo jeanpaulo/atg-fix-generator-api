@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="client.cfg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="client.cfg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="store\" />
+    <Folder Include="spec\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="QuickFix">
+      <HintPath>libs\QuickFix\QuickFix.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickFix.FIX44">
+      <HintPath>libs\QuickFix\QuickFix.FIX44.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
