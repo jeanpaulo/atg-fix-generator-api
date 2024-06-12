@@ -10,6 +10,7 @@ namespace OrderGenerator.API;
 public class FIXCommunicator : MessageCracker, IApplication
 {
     Session _session = null;
+    private int ClOrdID = 0;
 
     #region overrides
     public void OnCreate(SessionID sessionID)
@@ -80,7 +81,7 @@ public class FIXCommunicator : MessageCracker, IApplication
         {
             var newOrderSingle = new QuickFix.FIX44.NewOrderSingle
             (
-                new ClOrdID("12"),
+                new ClOrdID(GenClOrdID()),
                 new Symbol(request.Simbolo),
                 new Side(request.Lado),
                 new TransactTime(DateTime.Now),
@@ -119,5 +120,6 @@ public class FIXCommunicator : MessageCracker, IApplication
         }
     }
 
+    private string GenClOrdID() { return (++ClOrdID).ToString(); }
 
 }
